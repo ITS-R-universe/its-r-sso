@@ -1,57 +1,54 @@
-export default function Home() {
+'use client'
+import { useEffect, useState, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
+
+function SSOHandler() {
+  const params = useSearchParams()
+  const redirect = params.get('redirect') || 'https://its-r-portal.vercel.app'
+  const service = params.get('service') || 'ITS-R Universe'
+  const [dark, setDark] = useState(true)
+
+  useEffect(() => {
+    const t = localStorage.getItem('its-r-theme')
+    const isDark = t !== 'light'
+    setDark(isDark)
+    if (!isDark) document.documentElement.setAttribute('data-theme', 'light')
+  }, [])
+
+  const toggleTheme = () => {
+    const next = !dark; setDark(next)
+    if (next) { document.documentElement.removeAttribute('data-theme'); localStorage.setItem('its-r-theme','dark') }
+    else { document.documentElement.setAttribute('data-theme','light'); localStorage.setItem('its-r-theme','light') }
+  }
+
   return (
-    <div style={{ minHeight: '100vh', background: '#0a0a0f', display: 'flex', flexDirection: 'column' }}>
-      <header style={{ borderBottom: '1px solid #1e293b', background: '#0d1117', padding: '0 1.5rem' }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', height: 60, display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ fontSize: 22 }}>🔐</span>
-          <span style={{ color: '#d4af37', fontWeight: 800, fontSize: 20 }}>ITS-R SSO</span>
-        </div>
-      </header>
-      <main style={{ flex: 1, maxWidth: 800, margin: '0 auto', padding: '5rem 1.5rem', width: '100%' }}>
-        <h1 style={{ color: '#fff', fontSize: 42, fontWeight: 800, marginBottom: 16 }}>
-          <span style={{ color: '#d4af37' }}>ITS-R</span> Single Sign-On
-        </h1>
-        <p style={{ color: '#94a3b8', fontSize: 18, lineHeight: 1.7, marginBottom: 40 }}>
-          The authentication bridge of ITS-R Universe. One identity, seamless access to all services.
-        </p>
-
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 40 }}>
-          {[
-            { icon: '🔗', title: 'OAuth 2.0', desc: 'Standard authorization code flow for all ITS-R services.' },
-            { icon: '✅', title: 'Token Validation', desc: 'Any service can validate user tokens via /api/validate.' },
-            { icon: '🛂', title: 'Passport Integration', desc: 'Seamlessly connects with ITS-R Passport identity system.' },
-            { icon: '⚡', title: 'Instant Auth', desc: 'Sub-second token validation for real-time access control.' },
-          ].map(f => (
-            <div key={f.title} style={{ background: '#0d1117', border: '1px solid #1e293b', borderRadius: 16, padding: 24 }}>
-              <div style={{ fontSize: 28, marginBottom: 12 }}>{f.icon}</div>
-              <h3 style={{ color: '#e2e8f0', fontWeight: 700, fontSize: 16, marginBottom: 8 }}>{f.title}</h3>
-              <p style={{ color: '#64748b', fontSize: 14, lineHeight: 1.6 }}>{f.desc}</p>
-            </div>
-          ))}
-        </div>
-
-        <div style={{ background: '#0d1117', border: '1px solid #1e293b', borderRadius: 16, padding: 28 }}>
-          <h2 style={{ color: '#d4af37', fontWeight: 700, fontSize: 18, marginBottom: 16 }}>Integration Endpoints</h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {[
-              { method: 'GET', path: '/authorize', desc: 'Start OAuth 2.0 authorization flow' },
-              { method: 'POST', path: '/api/oauth/token', desc: 'Exchange authorization code for token' },
-              { method: 'GET', path: '/api/validate', desc: 'Validate access token (used by all services)' },
-              { method: 'GET', path: '/api/userinfo', desc: 'Get user info from Bearer token' },
-            ].map(e => (
-              <div key={e.path} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: '1px solid #1a1a2e' }}>
-                <span style={{ padding: '3px 8px', background: e.method === 'GET' ? 'rgba(52,211,153,0.1)' : 'rgba(251,191,36,0.1)', color: e.method === 'GET' ? '#34d399' : '#fbbf24', borderRadius: 4, fontSize: 11, fontWeight: 700, fontFamily: 'monospace', minWidth: 48, textAlign: 'center' }}>{e.method}</span>
-                <code style={{ color: '#d4af37', fontSize: 14, fontFamily: 'monospace' }}>{e.path}</code>
-                <span style={{ color: '#64748b', fontSize: 13 }}>{e.desc}</span>
-              </div>
-            ))}
+    <div style={{minHeight:'100vh',background:'var(--bg)',display:'flex',flexDirection:'column',fontFamily:'system-ui,sans-serif'}}>
+      <nav style={{display:'flex',justifyContent:'space-between',padding:'1rem 2rem',borderBottom:'1px solid var(--border)'}}>
+        <span style={{color:'var(--gold)',fontWeight:800}}>🔐 ITS-R SSO</span>
+        <button onClick={toggleTheme} style={{background:'var(--card)',border:'1px solid var(--border)',color:'var(--text)',padding:'0.4rem 0.75rem',borderRadius:'0.5rem',cursor:'pointer',fontSize:'0.8rem'}}>
+          {dark?'☀️':'🌙'}
+        </button>
+      </nav>
+      <div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',padding:'2rem'}}>
+        <div style={{textAlign:'center',maxWidth:400}}>
+          <div style={{fontSize:'3rem',marginBottom:'1rem'}}>🔐</div>
+          <h1 style={{fontSize:'1.5rem',fontWeight:700,marginBottom:'0.5rem'}}>Single Sign-On</h1>
+          <p style={{color:'var(--sub)',marginBottom:'2rem',fontSize:'0.9rem'}}>{service} is requesting access to your ITS-R account</p>
+          <div style={{background:'var(--card)',border:'1px solid var(--border)',borderRadius:'1rem',padding:'1.5rem',marginBottom:'1.5rem'}}>
+            <p style={{fontSize:'0.85rem',color:'var(--sub)',marginBottom:'1rem'}}>You will be redirected to ITS-R Passport to sign in</p>
+            <a href={`https://its-r-passport.vercel.app/login?redirect=${encodeURIComponent(redirect)}`} style={{display:'block',background:'var(--gold)',color:'#000',padding:'0.75rem',borderRadius:'0.5rem',fontWeight:700,textDecoration:'none',fontSize:'0.9rem'}}>
+              🛂 Sign in with ITS-R Passport
+            </a>
           </div>
+          <p style={{fontSize:'0.75rem',color:'var(--sub)'}}>
+            ITS-R Universe • In loving memory of Roshan Ali Sahab 🤲
+          </p>
         </div>
-      </main>
-      <footer style={{ borderTop: '1px solid #1e293b', padding: '2rem', textAlign: 'center' }}>
-        <p style={{ color: '#475569', fontSize: 14 }}>ITS-R Universe</p>
-        <p style={{ color: '#334155', fontSize: 12, marginTop: 4 }}>In loving memory of Roshan Ali Sahab</p>
-      </footer>
+      </div>
     </div>
   )
+}
+
+export default function SSOPage() {
+  return <Suspense><SSOHandler /></Suspense>
 }
